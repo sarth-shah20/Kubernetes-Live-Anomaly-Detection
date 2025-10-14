@@ -1,0 +1,5 @@
+k8s_anomaly_alerts.json
+__pycache__
+trained_model*
+*.png
+*.csv
