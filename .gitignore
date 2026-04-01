@@ -1,5 +1,9 @@
 k8s_anomaly_alerts.json
-__pycache__
+__pycache__/
 trained_model*
 *.png
 *.csv
+.venv/
+node_modules/
+dist/
+build/

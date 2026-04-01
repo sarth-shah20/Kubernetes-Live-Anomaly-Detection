@@ -12,14 +12,14 @@ warnings.filterwarnings('ignore')
 class KubernetesRealTimeMonitor:
     """
     Real-time Kubernetes anomaly detection and monitoring system
-    Integrates trained ML models with live Kubernetes metrics
+    Integrating trained ML models with live Kubernetes metrics
     """
     
     def __init__(self, model_path='trained_model.pkl', namespace='default'):
         """
-        Initialize the real-time monitoring system
+        Initializing real-time monitoring system
         
-        Args:
+        Arguments:
             model_path: Path to trained model pickle file
             namespace: Kubernetes namespace to monitor
         """
@@ -69,7 +69,6 @@ class KubernetesRealTimeMonitor:
     def get_pod_metrics(self, pod_name):
         """
         Get metrics for a specific pod from Kubernetes
-        
         Returns dict with CPU, memory, network, and other metrics
         """
         try:
@@ -100,8 +99,10 @@ class KubernetesRealTimeMonitor:
             # Get metrics from metrics-server (if available)
             try:
                 metrics = self._get_pod_metrics_from_server(pod_name)
-            except:
+            except Exception as e:
                 # If metrics-server not available, simulate realistic metrics
+                # metrics = self._simulate_pod_metrics()
+                print(f"   ⚠️  Metrics-server failed for {pod_name}: {e}")
                 metrics = self._simulate_pod_metrics()
             
             return {
@@ -125,6 +126,8 @@ class KubernetesRealTimeMonitor:
         if isinstance(cpu_str, (int, float)):
             return float(cpu_str)
         cpu_str = str(cpu_str)
+        if cpu_str.endswith('n'):      # nanocores
+            return float(cpu_str[:-1]) / 1e9
         if cpu_str.endswith('m'):
             return float(cpu_str[:-1]) / 1000
         return float(cpu_str)
@@ -153,38 +156,35 @@ class KubernetesRealTimeMonitor:
         return float(mem_str)
     
     def _get_pod_metrics_from_server(self, pod_name):
-        """Get actual metrics from Kubernetes metrics-server"""
-        # This requires metrics-server to be installed in the cluster
-        # For demo purposes, we'll provide both real and simulated options
+        """Get actual metrics via kubectl proxy at localhost:8001"""
+        import requests
         
-        # Attempt to get metrics via kubectl proxy or metrics API
-        try:
-            # Use custom objects API to get metrics
-            custom_api = client.CustomObjectsApi()
-            metrics = custom_api.get_namespaced_custom_object(
-                group="metrics.k8s.io",
-                version="v1beta1",
-                namespace=self.namespace,
-                plural="pods",
-                name=pod_name
-            )
-            
-            containers = metrics.get('containers', [])
-            total_cpu = 0
-            total_memory = 0
-            
-            for container in containers:
-                cpu_usage = container['usage'].get('cpu', '0')
-                mem_usage = container['usage'].get('memory', '0')
-                total_cpu += self._parse_cpu(cpu_usage)
-                total_memory += self._parse_memory(mem_usage)
-            
-            return {
-                'cpu_usage': total_cpu * 100,  # Convert to percentage
-                'memory_usage': total_memory / (1024**2)  # Convert to MB
-            }
-        except:
-            raise Exception("Metrics server not available")
+        url = f"http://localhost:8001/apis/metrics.k8s.io/v1beta1/namespaces/{self.namespace}/pods/{pod_name}"
+        
+        response = requests.get(url, timeout=5)
+        
+        if response.status_code != 200:
+            raise Exception(f"Metrics server returned {response.status_code}")
+        
+        data = response.json()
+        
+        total_cpu_cores = 0
+        total_mem_bytes = 0
+        
+        for container in data.get('containers', []):
+            cpu_str = container['usage'].get('cpu', '0')
+            mem_str = container['usage'].get('memory', '0')
+            total_cpu_cores += self._parse_cpu(cpu_str)
+            total_mem_bytes += self._parse_memory(mem_str)
+        
+        # Convert to percentages (minikube default: 2 cores, 2GB RAM)
+        cpu_percent  = min((total_cpu_cores / 2.0) * 100, 100)
+        mem_percent  = min((total_mem_bytes / (2 * 1024**3)) * 100, 100)
+        
+        return {
+            'cpu_usage':    round(cpu_percent, 2),
+            'memory_usage': round(mem_percent, 2)
+        }
     
     def _simulate_pod_metrics(self):
         """Simulate realistic pod metrics for demo purposes"""

@@ -226,12 +226,12 @@ class KubernetesAnomalyDetector:
         sample_indices = np.linspace(0, len(self.df)-1, sample_size, dtype=int)
         sample_data = self.df.iloc[sample_indices]
         
-        ax6.plot(sample_data['timestamp'], sample_data['overall_health'], 
+        ax6.plot(sample_data['timestamp'], sample_data['overall_health'],
                 label='Overall Health Score', alpha=0.7, linewidth=1)
         
         # Highlight anomalies
         anomaly_sample = sample_data[sample_data['is_anomaly'] == 1]
-        ax6.scatter(anomaly_sample['timestamp'], anomaly_sample['overall_health'], 
+        ax6.scatter(anomaly_sample['timestamp'], anomaly_sample['overall_health'],
                    color='red', s=30, alpha=0.8, label='Anomalies', zorder=5)
         
         ax6.set_title('System Health Over Time')
@@ -705,8 +705,8 @@ def main():
     """
     Main function to run the comprehensive ML pipeline
     """
-    print("🚀 PROFESSIONAL KUBERNETES ANOMALY DETECTION ML PIPELINE")
-    print("🎯 Production-Ready Models with Advanced Feature Engineering")
+    print("PROFESSIONAL KUBERNETES ANOMALY DETECTION ML PIPELINE")
+    print("Production-Ready Models with Advanced Feature Engineering")
     print("="*80)
     
     # Initialize detector
@@ -736,15 +736,15 @@ def main():
         best_model = detector.get_production_recommendations()
         
         print("\n" + "="*80)
-        print("🎉 PROFESSIONAL ML PIPELINE COMPLETED SUCCESSFULLY!")
+        print("PROFESSIONAL ML PIPELINE COMPLETED SUCCESSFULLY!")
         print("="*80)
         print("📊 DELIVERABLES CREATED:")
-        print("   ✅ Advanced feature engineering with 15+ derived features")
-        print("   ✅ 5 different ML models with hyperparameter optimization")
-        print("   ✅ Comprehensive performance evaluation with cross-validation")
-        print("   ✅ Production deployment recommendations")
-        print("   ✅ Professional visualizations and analysis")
-        print("   ✅ Statistical significance testing")
+        print("   Advanced feature engineering with 15+ derived features")
+        print("   5 different ML models with hyperparameter optimization")
+        print("   Comprehensive performance evaluation with cross-validation")
+        print("   Production deployment recommendations")
+        print("   Professional visualizations and analysis")
+        print("   Statistical significance testing")
         print("\n📁 Generated Files:")
         print("   • k8s_advanced_eda.png - Exploratory data analysis")
         print("   • k8s_comprehensive_model_analysis.png - Model performance")
@@ -825,7 +825,7 @@ def save_trained_model(detector):
     with open('trained_model.pkl', 'wb') as f:
         pickle.dump(model_data, f)
     
-    print(f"\n✅ Model saved to 'trained_model.pkl'")
+    print(f"\nModel saved to 'trained_model.pkl'")
     print(f"   Model: {best_model_name}")
     print(f"   F1-Score: {model_data['performance']['f1']:.3f}")
     print(f"   AUC: {model_data['performance']['auc']:.3f}")

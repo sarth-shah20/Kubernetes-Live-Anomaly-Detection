@@ -30,7 +30,7 @@ def train_and_save_model():
     
     # Load data
     X, y = detector.load_and_preprocess_data('kubernetes_metrics_dataset.csv')
-    
+
     # Feature selection
     X_selected, selected_features = detector.feature_selection(X, y, k=15)
     detector.selected_features = selected_features
